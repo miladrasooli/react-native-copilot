@@ -62,24 +62,30 @@ class ConnectedCopilotStep extends Component<Props> {
       }));
     }
 
-    return new Promise((resolve, reject) => {
-      const measure = () => {
+    const measure = () => {
         // Wait until the wrapper element appears
         if (this.wrapper && this.wrapper.measure) {
           this.wrapper.measure(
-            (ox, oy, width, height, x, y) => resolve({
-              x, y, width, height,
-            }),
-            reject,
+            (ox, oy, width, height, x, y) => {
+              try {
+                if (isNaN(x) || isNaN(y))
+                {
+                  requestAnimationFrame(measure)
+                }
+                else
+                  resolve({
+                    x, y, width, height,
+                  })
+              }
+              catch (error) {
+                reject(error)
+              }
+            }
           );
         } else {
           requestAnimationFrame(measure);
         }
       };
-
-      requestAnimationFrame(measure);
-    });
-  }
 
   render() {
     const copilot = {
